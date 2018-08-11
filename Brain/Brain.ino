@@ -1,15 +1,15 @@
-const int pianoLiveWires[] = {A5, A4, A3, A2, A1};
-const int numLiveWires = 5;
-const int pianoReadWires[] = {13, 12, 11, 10, 9, 8};
-const int numReadWires = 6;
-const int noteMap[numLiveWires][numReadWires] = {{ 66, 65, 64, 63, 62, 61},
-                                                 { 72, 71, 70, 69, 68, 67},
+const int pianoReadWires[] = {A5, A4, A3, A2, A1};
+const int numReadWires = 5;
+const int pianoLiveWires[] = {13, 12, 11, 10, 9, 8};
+const int numLiveWires = 6;
+const int noteMap[numReadWires][numLiveWires] = {{ 72, 71, 70, 69, 68, 67},
                                                  { 78, 77, 76, 75, 74, 73},
                                                  { 84, 83, 82, 81, 80, 79},
-                                                 { 90, 89, 88, 87, 86, 85}};
+                                                 { 90, 89, 88, 87, 86, 85},
+                                                 { 96, 95, 94, 93, 92, 91}};
 
 int activePianoWire = 0;
-int wireActivity[numLiveWires][numReadWires];
+int wireActivity[numReadWires][numLiveWires];
 
 void setup() {
   for (int i = 0; i < numLiveWires; i++) {
@@ -19,8 +19,8 @@ void setup() {
     pinMode(pianoReadWires[i], INPUT);
   }
 
-  for (int i = 0; i < numLiveWires; i++) {
-    for (int j = 0; j < numReadWires; j++) {
+  for (int i = 0; i < numReadWires; i++) {
+    for (int j = 0; j < numLiveWires; j++) {
       wireActivity[i][j] = LOW;
     }
   }
@@ -35,8 +35,8 @@ void loop() {
   int wireState;
   for (int readIndex = 0; readIndex < numReadWires; readIndex++) {
     wireState = digitalRead(pianoReadWires[readIndex]);
-    if (wireState != wireActivity[activePianoWire][readIndex]) {
-      wireActivity[activePianoWire][readIndex] = wireState;
+    if (wireState != wireActivity[readIndex][activePianoWire]) {
+      wireActivity[readIndex][activePianoWire] = wireState;
       sendWireStateChange(activePianoWire, readIndex, wireState);
     }
   }
@@ -60,7 +60,7 @@ void setLiveWire(int wireIndex, int val) {
 }
 
 void sendWireStateChange(int liveIndex, int readIndex, int state) {
-  int note = noteMap[liveIndex][readIndex];
+  int note = noteMap[readIndex][liveIndex];
   if (state == HIGH) {
     noteOn(note);
   } else {
@@ -83,5 +83,3 @@ void noteOff(int note) {
   Serial.write(note);
   Serial.write(NOTE_VELOCITY);
 }
-
-
