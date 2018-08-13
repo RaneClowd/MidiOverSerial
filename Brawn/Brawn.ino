@@ -1,19 +1,20 @@
-#include <SoftwareSerial.h>
-
-const int pianoLiveWires[] = {A5, A4, A3, A2, A1};
-const int numLiveWires = 5;
-const int pianoReadWires[] = {13, 12, 11, 10, 9, 8};
+const int pianoLiveWires[] = {A5, A4, A3, A2, A1, A0, 13}
+const int numLiveWires = 7;
+const int pianoReadWires[] = {12, 11, 10, 9, 8, 7};
 const int numReadWires = 6;
-const int noteMap[numLiveWires][numReadWires] = {{ 66, 65, 64, 63, 62, 61},
-                                                 { 72, 71, 70, 69, 68, 67},
-                                                 { 78, 77, 76, 75, 74, 73},
-                                                 { 84, 83, 82, 81, 80, 79},
-                                                 { 90, 89, 88, 87, 86, 85}};
-                                                 
+
+
+const int noteMap[numLiveWires][numReadWires] = {{ 65,  0, 61, 62, 63, 64},
+                                                 { 59, 60, 55, 56, 57, 58},
+                                                 { 53, 54, 49, 50, 51, 52},
+                                                 { 47, 48, 43, 44, 45, 46},
+                                                 { 41, 42, 37, 38, 39, 40},
+                                                 { 35, 36, 31, 32, 33, 34},
+                                                 {  0, 30,  0,  0,  0,  0}}
+
+
 int activePianoWire = 0;
 int wireActivity[numLiveWires][numReadWires];
-
-SoftwareSerial serial1(2, 3);
 
 void setup() {
   for (int i = 0; i < numLiveWires; i++) {
@@ -32,7 +33,6 @@ void setup() {
   setLiveWire(activePianoWire, HIGH);
 
   Serial.begin(9600);
-  serial1.begin(9600);
 }
 
 void loop() {
@@ -47,8 +47,6 @@ void loop() {
   }
 
   activateNextPianoWire();
-
-  passOverflowCommand();
 }
 
 void activateNextPianoWire() {
@@ -75,31 +73,18 @@ void sendWireStateChange(int liveIndex, int readIndex, int state) {
   }
 }
 
-void passOverflowCommand() {
-  if (serial1.available() == 3) {
-    int cmd = serial1.read();
-    int note = serial1.read();
-    int velocity = serial1.read();
-
-    sendCommand(cmd, note);
-  }
-}
-
 #define NOTE_ON_CMD 0x90
 #define NOTE_OFF_CMD 0x80
 #define NOTE_VELOCITY 127
 
 void noteOn(int note) {
-  sendCommand(NOTE_ON_CMD, note);
-}
-
-void noteOff(int note) {
-  sendCommand(NOTE_OFF_CMD, note);
-}
-
-void sendCommand(int code, int note) {
-  Serial.write(code);
+  Serial.write(NOTE_ON_CMD);
   Serial.write(note);
   Serial.write(NOTE_VELOCITY);
 }
 
+void noteOff(int note) {
+  Serial.write(NOTE_OFF_CMD);
+  Serial.write(note);
+  Serial.write(NOTE_VELOCITY);
+}
