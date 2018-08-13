@@ -4,7 +4,8 @@ const int pianoReadWires[] = {A5, A4, A3, A2, A1};
 const int numReadWires = 5;
 const int pianoLiveWires[] = {13, 12, 11, 10, 9, 8};
 const int numLiveWires = 6;
-const int noteMap[numReadWires][numLiveWires] = {{ 72, 71, 70, 69, 68, 67},
+const int noteMap[numReadWires][numLiveWires] = {{ 66,  0,  0,  0,  0,  0},
+                                                 { 72, 71, 70, 69, 68, 67},
                                                  { 78, 77, 76, 75, 74, 73},
                                                  { 84, 83, 82, 81, 80, 79},
                                                  { 90, 89, 88, 87, 86, 85}};
