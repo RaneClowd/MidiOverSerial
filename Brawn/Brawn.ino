@@ -1,10 +1,10 @@
-const int pianoLiveWires[] = {A5, A4, A3, A2, A1, A0, 13}
-const int numLiveWires = 7;
-const int pianoReadWires[] = {12, 11, 10, 9, 8, 7};
-const int numReadWires = 6;
+const int pianoReadWires[] = {A5, A4, A3, A2, A1, A0, 13}
+const int numReadWires = 7;
+const int pianoLiveWires[] = {12, 11, 10, 9, 8, 7};
+const int numLiveWires = 6;
 
 
-const int noteMap[numLiveWires][numReadWires] = {{ 65,  0, 61, 62, 63, 64},
+const int noteMap[numReadWires][numLiveWires] = {{ 65,  0, 61, 62, 63, 64},
                                                  { 59, 60, 55, 56, 57, 58},
                                                  { 53, 54, 49, 50, 51, 52},
                                                  { 47, 48, 43, 44, 45, 46},
@@ -12,9 +12,8 @@ const int noteMap[numLiveWires][numReadWires] = {{ 65,  0, 61, 62, 63, 64},
                                                  { 35, 36, 31, 32, 33, 34},
                                                  {  0, 30,  0,  0,  0,  0}}
 
-
 int activePianoWire = 0;
-int wireActivity[numLiveWires][numReadWires];
+int wireActivity[numReadWires][numLiveWires];
 
 void setup() {
   for (int i = 0; i < numLiveWires; i++) {
@@ -24,8 +23,8 @@ void setup() {
     pinMode(pianoReadWires[i], INPUT);
   }
 
-  for (int i = 0; i < numLiveWires; i++) {
-    for (int j = 0; j < numReadWires; j++) {
+  for (int i = 0; i < numReadWires; i++) {
+    for (int j = 0; j < numLiveWires; j++) {
       wireActivity[i][j] = LOW;
     }
   }
@@ -40,8 +39,8 @@ void loop() {
   int wireState;
   for (int readIndex = 0; readIndex < numReadWires; readIndex++) {
     wireState = digitalRead(pianoReadWires[readIndex]);
-    if (wireState != wireActivity[activePianoWire][readIndex]) {
-      wireActivity[activePianoWire][readIndex] = wireState;
+    if (wireState != wireActivity[readIndex][activePianoWire]) {
+      wireActivity[readIndex][activePianoWire] = wireState;
       sendWireStateChange(activePianoWire, readIndex, wireState);
     }
   }
@@ -65,7 +64,7 @@ void setLiveWire(int wireIndex, int val) {
 }
 
 void sendWireStateChange(int liveIndex, int readIndex, int state) {
-  int note = noteMap[liveIndex][readIndex];
+  int note = noteMap[readIndex][liveIndex];
   if (state == HIGH) {
     noteOn(note);
   } else {
@@ -78,13 +77,15 @@ void sendWireStateChange(int liveIndex, int readIndex, int state) {
 #define NOTE_VELOCITY 127
 
 void noteOn(int note) {
-  Serial.write(NOTE_ON_CMD);
-  Serial.write(note);
-  Serial.write(NOTE_VELOCITY);
+  sendCommand(NOTE_ON_CMD, note);
 }
 
 void noteOff(int note) {
-  Serial.write(NOTE_OFF_CMD);
+  sendCommand(NOTE_OFF_CMD, note);
+}
+
+void sendCommand(int code, int note) {
+  Serial.write(code);
   Serial.write(note);
   Serial.write(NOTE_VELOCITY);
 }
